@@ -1,15 +1,15 @@
-//chocobit 2018/11/1
-/** v1.1.2 */
+//MRobot 2018/11/12
+/** v1.0.0 */
 //% color="#f97c04" weight=25 icon="\uf1b9"
-namespace ChocoCar {
-
+namespace MRobotCar {
+    /*PCA9685地址*/
     const PCA9685_ADD = 0x41
     const MODE1 = 0x00
     const MODE2 = 0x01
     const SUBADR1 = 0x02
     const SUBADR2 = 0x03
     const SUBADR3 = 0x04
-
+    /*LED地址*/
     const LED0_ON_L = 0x06
     const LED0_ON_H = 0x07
     const LED0_OFF_L = 0x08
@@ -27,7 +27,7 @@ namespace ChocoCar {
 
     export enum enServo {
         //blockId=servo_s1 block="接口1"
-        S1 = 1,
+        S1,
         //blockId=servo_s2 block="接口2"
         S2,
         //blockId=servo_s3 block="接口3"
@@ -181,21 +181,17 @@ namespace ChocoCar {
             case CarState.Car_SpinRight: move(speed, -speed); break;
         }
     }
-
     //% blockId=Choco_Servo block="舵机控制|编号 %num|角度 %value"
     //% weight=80
     //% advanced=true
     //% value.min=0 value.max=180
     //% num.fieldEditor="gridpicker" num.fieldOptions.columns=4
     export function Servo(num: enServo, value: number): void {
-
         // 50hz: 20,000 us
         let us = (value * 1800 / 180 + 600); // 0.6 ~ 2.4
         let pwm = us * 4096 / 20000;
         setPwm(num + 10, pwm);      //
-
     }
-
     //% blockId=Choco_bus_Servo block="总线舵机控制|ID %ID|角度 %value|时间 %time ms"
     //% weight=79 color="#a5a5a5"
     //% time.defl=500 time.min=0
@@ -227,7 +223,7 @@ namespace ChocoCar {
     }
     export enum Servo_mode {
         //% blockId=bus_Servo_mode_1 block="顺时针270°"
-        CW270 = 1,
+        CW270,
         //% blockId=bus_Servo_mode_2 block="逆时针270°"
         CCW,
         //% blockId=bus_Servo_mode_3 block="顺时针180°"
@@ -261,7 +257,7 @@ namespace ChocoCar {
     }
     export enum IR_sensor {
         //% blockId=IR_Left2 block="左后"
-        Left2 = 0,
+        Left2,
         //% blockId=IR_Left1 block="左前"
         Left1,
         //% blockId=IR_Right1 block="右前"
@@ -314,7 +310,6 @@ namespace ChocoCar {
     //% weight=20
     //% 
     export function Ultrasonic(): number {
-
         // send pulse
         pins.setPull(DigitalPin.P14, PinPullMode.PullUp);
         pins.digitalWritePin(DigitalPin.P16, 0);
@@ -322,7 +317,6 @@ namespace ChocoCar {
         pins.digitalWritePin(DigitalPin.P16, 1);
         control.waitMicros(15);
         pins.digitalWritePin(DigitalPin.P16, 0);
-
         // read pulse
         let d = pins.pulseIn(DigitalPin.P14, PulseValue.High, 23200);
         return d / 58;
@@ -333,7 +327,7 @@ namespace ChocoCar {
         turn_off = true
     }
     export enum key {
-        A = 1,
+        A,
         B
     }
     /**
@@ -344,123 +338,15 @@ namespace ChocoCar {
     export function press_to_continue(button: key) {
         if (button == 1)
             while (!(input.buttonIsPressed(Button.A))) {
-
             }
         else
             while (!(input.buttonIsPressed(Button.B))) {
-
             }
-    }
-}
-//% color="#f23c17" weight=20 icon="\uf085"
-namespace MUsensor {
-    export enum MODE {
-        //% blockId=MU_mode_face block="人脸"
-        FACE = 0,
-        //% blockId=MU_mode_ball block="球"
-        BALL,
-        //% blockId=MU_mode_line block="线"
-        LINE,
-        //% blockId=MU_mode_body block="人体"
-        BODY,
-        //% blockId=MU_mode_shape block="形状卡片"
-        SHAPE,
-        //% blockId=MU_mode_signal block="标志卡片"
-        SIGNAL,
-        //% blockId=MU_mode_moving block="移动物体"
-        MOVING,
-        //% blockId=MU_mode_moving block="特定人脸"
-        FACERCG,
-        //% blockId=MU_mode_color block="颜色"
-        COLOR
-
-    }
-    export enum DIR {
-        //%blockId=DIR_X block="X"
-        X = 0,
-        //%blockId=DIR_Y block="Y"
-        Y
-    }
-
-    //% blockId=MU_init block="初始化MU传感器"
-    //% weight=90
-    export function init() {
-
-        serial.writeLine("CMD+SENSOR_SETUP")
-        basic.pause(100)
-        serial.writeLine("CMD+UART_STATUS=ENABLE")
-        basic.pause(100)
-        serial.writeLine("CMD+UART_OUTPUT=CALLBACK")
-        basic.pause(100)
-        serial.writeLine("CMD+SENSOR_SAVE")
-        basic.pause(100)
-        serial.writeLine("CMD+SENSOR_EXIT")
-
-    }
-
-    //% blockId=MU_face_train block="录入人脸"
-    export function facetrain() {
-        serial.writeLine("CMD+SENSOR_SETUP")
-        basic.pause(100)
-        serial.writeLine("CMD+VISION_OPTION=FACETRAIN")
-        basic.pause(100)
-    }
-
-    //% blockId=MU_set_mode block="设置检测模式为 %mode"
-    //% mode.fieldEditor="gridpicker" mode.fieldOptions.columns=3
-    //% weight=85
-    export function setmode(mode: MODE): void {
-        serial.writeLine("CMD+SENSOR_SETUP")
-        basic.pause(100);
-        switch (mode) {
-            case 0: serial.writeLine("CMD+VISION_TYPE=FACE")
-            case 1: serial.writeLine("CMD+VISION_TYPE=BALL")
-            case 2: serial.writeLine("CMD+VISION_TYPE=LINE")
-            case 3: serial.writeLine("CMD+VISION_TYPE=BODY")
-            case 4: serial.writeLine("CMD+VISION_TYPE=SHAPE")
-            case 5: serial.writeLine("CMD+VISION_TYPE=SIGNAL")
-            case 6: serial.writeLine("CMD+VISION_TYPE=MOVING")
-            case 7: serial.writeLine("CMD+VISION_TYPE=FACERCG")
-            case 8: serial.writeLine("CMD+VISION_TYPE=COLOR")
-        }
-        basic.pause(100)
-        serial.writeLine("CMD+SENSOR_SAVE")
-        basic.pause(100)
-        serial.writeLine("CMD+SENSOR_EXIT")
-    }
-
-    //%blockId=MU_isdetected block="看到目标"
-    //%weight=80
-    export function isdetected(): boolean {
-        serial.writeLine("CMD+VISION_DETECT=RESULT")
-        basic.pause(100)
-        let result = serial.readUntil(String.fromCharCode(0xed))
-        if (result.charCodeAt(2) == 0)
-            return false
-        else return true
-    }
-
-    //%blockId=MU_detect_result block="检测结果 %dir|坐标"
-    //%help="如果检测到目标，返回目标物体的X,Y坐标，范围为0~100，否则返回-1"
-    //%weight=75
-    export function detect_result(dir: DIR): number {
-        serial.writeLine("CMD+VISION_DETECT=RESULT")
-        basic.pause(100)
-        let result = serial.readUntil(String.fromCharCode(0xed))
-        if (result.charCodeAt(2) == 0)
-            return -1
-        else {
-            if (dir == 0)
-                return result.charCodeAt(3)
-            else
-                return result.charCodeAt(4)
-        }
     }
 }
 /**
  * Well known colors for a NeoPixel strip
  */
-
 enum NeoPixelColors {
     //% block=red
     Red = 0xFF0000,
